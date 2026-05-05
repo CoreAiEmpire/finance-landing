@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>บัญชีรายวัน — เลขาการเงินส่วนตัวของคุณ</title>
+  <meta name="description" content="แอปบัญชีรายวัน บันทึกรายรับ-รายจ่าย วิเคราะห์การเงิน และส่งสลิปผ่าน Line OA ได้ทันที" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1A56DB;
+      --primary-dark: #1340B0;
+      --primary-light: #EBF2FF;
+      --accent: #F59E0B;
+      --accent-dark: #D97706;
+      --success: #16A34A;
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --bg: #F8FAFC;
+      --white: #FFFFFF;
+      --border: #E2E8F0;
+      --line-green: #06C755;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ===== NAVBAR ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 20px; font-weight: 700; color: var(--primary);
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 36px; height: 36px; background: var(--primary);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .btn-nav-line {
+      background: var(--line-green); color: white;
+      padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+      transition: opacity 0.2s;
+    }
+    .btn-nav-line:hover { opacity: 0.85; }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #1A56DB 100%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 100px 24px 60px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(59,130,246,0.3) 0%, transparent 60%);
+    }
+    .hero-content {
+      max-width: 1100px; width: 100%;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+      position: relative; z-index: 1;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4);
+      color: var(--accent); padding: 6px 14px; border-radius: 100px;
+      font-size: 13px; font-weight: 600; margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px); font-weight: 800;
+      color: white; line-height: 1.2; margin-bottom: 20px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero-desc {
+      font-size: 18px; color: rgba(255,255,255,0.75);
+      margin-bottom: 36px; line-height: 1.7;
+    }
+    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--accent); color: var(--text);
+      padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 700;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(245,158,11,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,158,11,0.5); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.1); color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 600;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+
+    /* Phone mockup */
+    .hero-phone {
+      display: flex; justify-content: center; align-items: center;
+    }
+    .phone-frame {
+      width: 260px; height: 520px;
+      background: #1E293B;
+      border-radius: 40px;
+      border: 3px solid rgba(255,255,255,0.15);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+      overflow: hidden; position: relative;
+      display: flex; flex-direction: column;
+    }
+    .phone-notch {
+      width: 100px; height: 24px;
+      background: #0F172A; border-radius: 0 0 16px 16px;
+      margin: 0 auto; position: relative; z-index: 2;
+    }
+    .phone-screen {
+      flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+      overflow: hidden;
+    }
+    .phone-header {
+      background: linear-gradient(135deg, #1A56DB, #3B82F6);
+      border-radius: 16px; padding: 16px;
+      color: white;
+    }
+    .phone-header-title { font-size: 11px; opacity: 0.8; margin-bottom: 2px; }
+    .phone-header-amount { font-size: 24px; font-weight: 800; }
+    .phone-header-sub { font-size: 10px; opacity: 0.7; margin-top: 4px; }
+    .phone-card {
+      background: #2D3748; border-radius: 12px; padding: 10px 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .phone-card-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      flex-shrink: 0;
+    }
+    .phone-card-info { flex: 1; min-width: 0; }
+    .phone-card-name { font-size: 11px; color: #E2E8F0; font-weight: 600; }
+    .phone-card-date { font-size: 9px; color: #94A3B8; }
+    .phone-card-amount { font-size: 12px; font-weight: 700; }
+    .income { color: #4ADE80; }
+    .expense { color: #F87171; }
+
+    /* ===== STATS ===== */
+    .stats {
+      background: white; padding: 48px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-inner {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; text-align: center;
+    }
+    .stat-number { font-size: 40px; font-weight: 800; color: var(--primary); }
+    .stat-label { font-size: 15px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ===== SECTION COMMON ===== */
+    section { padding: 80px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-tag {
+      display: inline-block; background: var(--primary-light); color: var(--primary);
+      padding: 4px 14px; border-radius: 100px; font-size: 13px; font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(26px, 4vw, 40px); font-weight: 800;
+      color: var(--text); margin-bottom: 16px; line-height: 1.25;
+    }
+    .section-desc { font-size: 17px; color: var(--text-muted); max-width: 560px; line-height: 1.7; }
+
+    /* ===== FEATURES ===== */
+    .features { background: white; }
+    .features-grid {
+      margin-top: 56px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;
+    }
+    .feature-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 20px; padding: 28px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(26,86,219,0.1); }
+    .feature-icon {
+      width: 52px; height: 52px; background: var(--primary-light);
+      border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 18px;
+    }
+    .feature-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .feature-desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ===== LINE OA SECTION ===== */
+    .line-section {
+      background: linear-gradient(135deg, #0F172A, #064E3B);
+      color: white;
+    }
+    .line-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+      margin-top: 48px;
+    }
+    .line-steps { display: flex; flex-direction: column; gap: 20px; }
+    .line-step {
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .step-num {
+      width: 36px; height: 36px; background: var(--line-green);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 15px; flex-shrink: 0; color: white;
+    }
+    .step-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .step-content p { font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.5; }
+    .line-chat {
+      background: #1E293B; border-radius: 20px; padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .chat-header {
+      display: flex; align-items: center; gap: 10px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .chat-avatar {
+      width: 36px; height: 36px; background: var(--line-green);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .chat-name { font-size: 14px; font-weight: 700; }
+    .chat-sub { font-size: 11px; color: rgba(255,255,255,0.5); }
+    .chat-bubble {
+      max-width: 80%; padding: 10px 14px; border-radius: 16px;
+      font-size: 13px; line-height: 1.5;
+    }
+    .bubble-user {
+      background: var(--primary); color: white;
+      align-self: flex-end; border-bottom-right-radius: 4px;
+    }
+    .bubble-bot {
+      background: #2D3748; color: #E2E8F0;
+      align-self: flex-start; border-bottom-left-radius: 4px;
+    }
+    .bubble-bot strong { color: #4ADE80; }
+
+    /* ===== PRICING ===== */
+    .pricing { background: var(--bg); }
+    .pricing-grid {
+      margin-top: 56px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;
+      align-items: start;
+    }
+    .pricing-card {
+      background: white; border: 2px solid var(--border);
+      border-radius: 24px; padding: 32px; position: relative;
+      transition: transform 0.2s;
+    }
+    .pricing-card:hover { transform: translateY(-4px); }
+    .pricing-card.featured {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(26,86,219,0.1);
+    }
+    .pricing-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--primary); color: white;
+      padding: 4px 16px; border-radius: 100px; font-size: 12px; font-weight: 700;
+      white-space: nowrap;
+    }
+    .pricing-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .pricing-price { font-size: 40px; font-weight: 800; color: var(--primary); }
+    .pricing-price span { font-size: 16px; font-weight: 400; color: var(--text-muted); }
+    .pricing-desc { font-size: 14px; color: var(--text-muted); margin: 12px 0 24px; }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .pricing-features li {
+      font-size: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .pricing-features li::before { content: '✓'; color: var(--success); font-weight: 700; }
+    .pricing-features li.no::before { content: '✕'; color: #CBD5E1; }
+    .pricing-features li.no { color: #CBD5E1; }
+    .btn-pricing {
+      display: block; text-align: center; padding: 13px;
+      border-radius: 12px; font-size: 15px; font-weight: 700;
+      text-decoration: none; transition: opacity 0.2s;
+    }
+    .btn-pricing-primary { background: var(--primary); color: white; }
+    .btn-pricing-outline { border: 2px solid var(--border); color: var(--text); }
+    .btn-pricing-line { background: var(--line-green); color: white; }
+    .btn-pricing:hover { opacity: 0.85; }
+
+    /* ===== CTA ===== */
+    .cta-section {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: white; text-align: center; padding: 80px 24px;
+    }
+    .cta-section h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; margin-bottom: 16px; }
+    .cta-section p { font-size: 18px; opacity: 0.85; margin-bottom: 36px; }
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-cta-white {
+      background: white; color: var(--primary);
+      padding: 14px 32px; border-radius: 12px; font-size: 16px; font-weight: 700;
+      text-decoration: none; transition: transform 0.2s;
+    }
+    .btn-cta-white:hover { transform: translateY(-2px); }
+    .btn-cta-line {
+      background: var(--line-green); color: white;
+      padding: 14px 32px; border-radius: 12px; font-size: 16px; font-weight: 700;
+      text-decoration: none; display: flex; align-items: center; gap: 8px;
+      transition: transform 0.2s;
+    }
+    .btn-cta-line:hover { transform: translateY(-2px); }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: #0F172A; color: rgba(255,255,255,0.6);
+      padding: 40px 24px; text-align: center;
+    }
+    footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    footer a:hover { color: white; }
+    .footer-inner { max-width: 800px; margin: 0 auto; }
+    .footer-logo { font-size: 20px; font-weight: 800; color: white; margin-bottom: 12px; }
+    .footer-links { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin: 16px 0; font-size: 14px; }
+    .footer-copy { font-size: 13px; margin-top: 16px; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .hero-content { grid-template-columns: 1fr; text-align: center; }
+      .hero-phone { display: none; }
+      .hero-cta { justify-content: center; }
+      .stats-inner { grid-template-columns: 1fr; gap: 24px; }
+      .line-grid { grid-template-columns: 1fr; }
+      .nav-actions .btn-nav-line span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">💰</div>
+    บัญชีรายวัน
+  </a>
+  <div class="nav-actions">
+    <a href="https://lin.ee/qi2Plpf" target="_blank" class="btn-nav-line">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+      <span>ทดลองใช้ฟรีผ่าน Line</span>
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div>
+      <div class="hero-badge">✨ เลขาการเงินส่วนตัวของคุณ</div>
+      <h1>จัดการเงินง่าย<br/>ด้วย <span>AI ช่วยบันทึก</span></h1>
+      <p class="hero-desc">
+        บันทึกรายรับ-รายจ่ายผ่าน Line OA ได้ทันที แค่พิมพ์หรือส่งสลิป
+        ระบบจัดการให้อัตโนมัติ พร้อมสรุปยอดรายวัน-รายเดือน
+      </p>
+      <div class="hero-cta">
+        <a href="#pricing" class="btn-primary">📱 ดาวน์โหลดแอป</a>
+        <a href="https://lin.ee/qi2Plpf" target="_blank" class="btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.630 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+          ทดลองผ่าน Line OA
+        </a>
+      </div>
+    </div>
+    <div class="hero-phone">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-header-title">ยอดคงเหลือเดือนนี้</div>
+            <div class="phone-header-amount">฿ 24,850</div>
+            <div class="phone-header-sub">รายรับ ฿38,500 · รายจ่าย ฿13,650</div>
+          </div>
+          <div class="phone-card">
+            <div class="phone-card-icon" style="background:#064E3B">💰</div>
+            <div class="phone-card-info">
+              <div class="phone-card-name">เงินเดือน</div>
+              <div class="phone-card-date">1 พ.ค. 2568</div>
+            </div>
+            <div class="phone-card-amount income">+฿35,000</div>
+          </div>
+          <div class="phone-card">
+            <div class="phone-card-icon" style="background:#7C2D12">🛒</div>
+            <div class="phone-card-info">
+              <div class="phone-card-name">ซื้อของตลาด</div>
+              <div class="phone-card-date">3 พ.ค. 2568</div>
+            </div>
+            <div class="phone-card-amount expense">-฿850</div>
+          </div>
+          <div class="phone-card">
+            <div class="phone-card-icon" style="background:#1E3A5F">⛽</div>
+            <div class="phone-card-info">
+              <div class="phone-card-name">เติมน้ำมัน</div>
+              <div class="phone-card-date">4 พ.ค. 2568</div>
+            </div>
+            <div class="phone-card-amount expense">-฿600</div>
+          </div>
+          <div class="phone-card">
+            <div class="phone-card-icon" style="background:#3B0764">🍜</div>
+            <div class="phone-card-info">
+              <div class="phone-card-name">อาหารกลางวัน</div>
+              <div class="phone-card-date">5 พ.ค. 2568</div>
+            </div>
+            <div class="phone-card-amount expense">-฿120</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-inner">
+    <div>
+      <div class="stat-number">10,000+</div>
+      <div class="stat-label">ผู้ใช้งานทั่วประเทศ</div>
+    </div>
+    <div>
+      <div class="stat-number">฿500M+</div>
+      <div class="stat-label">ยอดบันทึกรายการ</div>
+    </div>
+    <div>
+      <div class="stat-number">4.9 ★</div>
+      <div class="stat-label">คะแนนความพึงพอใจ</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="section-inner">
+    <div class="section-tag">ฟีเจอร์หลัก</div>
+    <h2 class="section-title">ครบทุกอย่างที่คุณต้องการ</h2>
+    <p class="section-desc">ออกแบบมาเพื่อคนไทย ใช้งานง่าย ไม่ต้องมีความรู้บัญชี</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Dashboard สรุปยอด</div>
+        <div class="feature-desc">เห็นภาพรวมการเงินทันที รายวัน รายสัปดาห์ รายเดือน พร้อมกราฟวิเคราะห์</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <div class="feature-title">บันทึกผ่าน Line OA</div>
+        <div class="feature-desc">แค่พิมพ์ "กาแฟ 65" หรือส่งสลิปโอนเงิน ระบบบันทึกให้อัตโนมัติ ไม่ต้องเปิดแอป</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧾</div>
+        <div class="feature-title">อ่านสลิปอัตโนมัติ</div>
+        <div class="feature-desc">ส่งรูปสลิปโอนเงิน AI อ่านยอด วันที่ และชื่อผู้รับให้ครบถ้วน ไม่ต้องพิมพ์เอง</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏷️</div>
+        <div class="feature-title">หมวดหมู่อัจฉริยะ</div>
+        <div class="feature-desc">จัดหมวดหมู่รายจ่ายอัตโนมัติ อาหาร เดินทาง ช้อปปิ้ง สุขภาพ และอื่นๆ</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">ตั้งเป้าหมายการออม</div>
+        <div class="feature-desc">กำหนดงบประมาณรายหมวด รับแจ้งเตือนเมื่อใกล้เกินงบ ช่วยควบคุมการใช้จ่าย</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📤</div>
+        <div class="feature-title">Export รายงาน</div>
+        <div class="feature-desc">ส่งออกรายงานเป็น Excel หรือ PDF ส่งให้นักบัญชีหรือเก็บเป็นหลักฐาน</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LINE OA SECTION -->
+<section class="line-section">
+  <div class="section-inner">
+    <div class="section-tag" style="background:rgba(6,199,85,0.15);color:#4ADE80">Line OA Integration</div>
+    <h2 class="section-title" style="color:white">บันทึกบัญชีง่ายแค่<br/>พิมพ์ใน Line</h2>
+    <p class="section-desc" style="color:rgba(255,255,255,0.7)">
+      ไม่ต้องเปิดแอปทุกครั้ง แค่ส่งข้อความใน Line OA ระบบ n8n automation จัดการให้ทั้งหมด
+    </p>
+    <div class="line-grid">
+      <div class="line-steps">
+        <div class="line-step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>เพิ่มเพื่อน Line OA</h4>
+            <p>เพิ่ม @CoreAiFinance เป็นเพื่อนใน Line แล้วเริ่มใช้งานได้ทันที</p>
+          </div>
+        </div>
+        <div class="line-step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>พิมพ์รายการหรือส่งสลิป</h4>
+            <p>พิมพ์ "ข้าวเที่ยง 80" หรือส่งรูปสลิปโอนเงิน AI อ่านให้อัตโนมัติ</p>
+          </div>
+        </div>
+        <div class="line-step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>ระบบบันทึกและตอบกลับ</h4>
+            <p>n8n automation บันทึกลงบัญชีทันที พร้อมตอบยืนยันและสรุปยอดวันนี้</p>
+          </div>
+        </div>
+        <div class="line-step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>ดูรายงานในแอปหรือ Line</h4>
+            <p>พิมพ์ "สรุปเดือนนี้" รับรายงานทันทีใน Line หรือเปิดแอปดูกราฟละเอียด</p>
+          </div>
+        </div>
+      </div>
+      <div class="line-chat">
+        <div class="chat-header">
+          <div class="chat-avatar">💰</div>
+          <div>
+            <div class="chat-name">บัญชีรายวัน AI</div>
+            <div class="chat-sub">Official Account · Online</div>
+          </div>
+        </div>
+        <div class="chat-bubble bubble-user">ข้าวเที่ยง 80 บาท</div>
+        <div class="chat-bubble bubble-bot">
+          ✅ บันทึกแล้วครับ<br/>
+          🍜 อาหาร: <strong>-฿80</strong><br/>
+          📅 5 พ.ค. 2568 12:15 น.<br/>
+          💰 คงเหลือวันนี้: <strong>฿1,240</strong>
+        </div>
+        <div class="chat-bubble bubble-user">ส่งสลิปโอนเงิน [รูปสลิป]</div>
+        <div class="chat-bubble bubble-bot">
+          ✅ อ่านสลิปแล้วครับ<br/>
+          💸 รายรับ: <strong>+฿5,000</strong><br/>
+          👤 จาก: นายสมชาย ใจดี<br/>
+          📅 5 พ.ค. 2568 14:30 น.
+        </div>
+        <div class="chat-bubble bubble-user">สรุปเดือนนี้</div>
+        <div class="chat-bubble bubble-bot">
+          📊 สรุปพฤษภาคม 2568<br/>
+          💚 รายรับ: <strong>฿38,500</strong><br/>
+          🔴 รายจ่าย: <strong>฿13,650</strong><br/>
+          💰 คงเหลือ: <strong>฿24,850</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="section-inner">
+    <div class="section-tag">ราคา</div>
+    <h2 class="section-title">เลือกแผนที่เหมาะกับคุณ</h2>
+    <p class="section-desc">เริ่มต้นฟรี อัปเกรดได้ตามความต้องการ ไม่มีสัญญาผูกมัด</p>
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="pricing-card">
+        <div class="pricing-name">ฟรี</div>
+        <div class="pricing-price">฿0 <span>/ เดือน</span></div>
+        <div class="pricing-desc">เหมาะสำหรับผู้เริ่มต้น ทดลองใช้งาน</div>
+        <ul class="pricing-features">
+          <li>บันทึกรายการ 50 รายการ/เดือน</li>
+          <li>Dashboard สรุปยอด</li>
+          <li>หมวดหมู่พื้นฐาน</li>
+          <li class="no">Line OA Integration</li>
+          <li class="no">อ่านสลิปอัตโนมัติ</li>
+          <li class="no">Export รายงาน</li>
+        </ul>
+        <a href="#" class="btn-pricing btn-pricing-outline">ดาวน์โหลดฟรี</a>
+      </div>
+      <!-- Pro -->
+      <div class="pricing-card featured">
+        <div class="pricing-badge">🔥 ยอดนิยม</div>
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price">฿599 <span>/ ครั้งเดียว</span></div>
+        <div class="pricing-desc">ซื้อขาด ใช้ได้ตลอดชีพ ไม่มีค่าใช้จ่ายรายเดือน</div>
+        <ul class="pricing-features">
+          <li>บันทึกรายการไม่จำกัด</li>
+          <li>Dashboard + กราฟวิเคราะห์</li>
+          <li>หมวดหมู่ไม่จำกัด</li>
+          <li>Export Excel / PDF</li>
+          <li>ตั้งงบประมาณและเป้าหมาย</li>
+          <li class="no">Line OA Integration</li>
+        </ul>
+        <a href="#" class="btn-pricing btn-pricing-primary">ซื้อเลย ฿599</a>
+      </div>
+      <!-- Premium -->
+      <div class="pricing-card">
+        <div class="pricing-name">Premium</div>
+        <div class="pricing-price">฿299 <span>/ เดือน</span></div>
+        <div class="pricing-desc">มีเลขาการเงินส่วนตัว บันทึกผ่าน Line ได้ทันที</div>
+        <ul class="pricing-features">
+          <li>ทุกอย่างใน Pro</li>
+          <li>Line OA บันทึกอัตโนมัติ</li>
+          <li>AI อ่านสลิปโอนเงิน</li>
+          <li>สรุปยอดผ่าน Line ทุกวัน</li>
+          <li>แจ้งเตือนเกินงบ</li>
+          <li>Priority Support</li>
+        </ul>
+        <a href="https://lin.ee/qi2Plpf" target="_blank" class="btn-pricing btn-pricing-line">เริ่มใช้ผ่าน Line</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div>
+    <h2>เริ่มจัดการเงินวันนี้</h2>
+    <p>ทดลองใช้ฟรีผ่าน Line OA ได้ทันที ไม่ต้องสมัคร ไม่ต้องกรอกข้อมูล</p>
+    <div class="cta-buttons">
+      <a href="#pricing" class="btn-cta-white">📱 ดาวน์โหลดแอป</a>
+      <a href="https://lin.ee/qi2Plpf" target="_blank" class="btn-cta-line">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.630 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+        ทดลองฟรีผ่าน Line OA
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">💰 บัญชีรายวัน</div>
+    <p>เลขาการเงินส่วนตัวของคุณ — จัดการเงินง่าย ด้วย AI</p>
+    <div class="footer-links">
+      <a href="#">หน้าหลัก</a>
+      <a href="#pricing">ราคา</a>
+      <a href="https://lin.ee/qi2Plpf" target="_blank">Line OA</a>
+      <a href="#">นโยบายความเป็นส่วนตัว</a>
+    </div>
+    <div class="footer-copy">© 2568 CoreAiEmpire · Powered by coreaiempire.com</div>
+  </div>
+</footer>
+
+</body>
+</html>
